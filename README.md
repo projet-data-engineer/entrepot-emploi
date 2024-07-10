@@ -56,7 +56,7 @@ DOSSIER_NAF=naf
 DOSSIER_SIRENE=sirene
 ```
 
-### Installation des dépendances Python
+### Installer des dépendances Python
 
 ```powershell
 
@@ -64,7 +64,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-### Execution Docker
+### Executer Docker
 
 ```bash
 #!/bin/bash
@@ -73,7 +73,7 @@ docker-compose build
 docker-compose up -d
 ```
 
-### Execution des DAGs Airflow
+### Executer les DAG's Airflow
 
   - pipeline_cog_carto
   - pipeline_naf
@@ -81,12 +81,26 @@ docker-compose up -d
   - pipeline_rome
   - pipeline_sirene
 
-### Execution du projet visualisation - Evidence
+### Charger l'ensemble des fichiers de collecte d'offres d'emploi présents dans le dossier donnees_brutes/offre_emploi
+
+- executer localement le script Python chargement/chargement_offres_stock.py
+- executer la transformation dbt depuis /transformation
 
 ```powershell
+cd .\transformation\
+dbt run
+```
 
+### Execution du projet visualisation - Evidence
+
+- Note: les fichiers geojson utilisés par les visualisations spatiales sont créés par le script chargement/chargement_cog_carto.py executé par le DAG pipeline_cog_carto
+
+```powershell
 cd .\visualisation\
-npm install
-npm run sources --changed
 
+# Installation des dépendances
+npm install
+
+# Mise à jour des sources
+npm run sources --changed
 ```
