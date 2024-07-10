@@ -25,5 +25,3 @@ where
     value=population
     height=500
 />
-
-## 2
