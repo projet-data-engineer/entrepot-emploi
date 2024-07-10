@@ -81,7 +81,7 @@ docker-compose up -d
   - pipeline_rome
   - pipeline_sirene
 
-### Charger l'ensemble des fichiers de collecte d'offres d'emploi présents dans le dossier donnees_brutes/offre_emploi
+### Charger l'ensemble des fichiers de collecte d'offres d'emploi présents dans le dossier donnees_brutes/offre_emploi (Optionnel)
 
 - executer localement le script Python chargement/chargement_offres_stock.py
 - executer la transformation dbt depuis /transformation
