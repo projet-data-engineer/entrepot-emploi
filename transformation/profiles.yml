@@ -1,0 +1,21 @@
+transformation:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: entrepot
+      password: entrepot
+      port: 5432
+      dbname: entrepot
+      schema: emploi
+      threads: 4
+    prod:
+      type: postgres
+      host: entrepot
+      user: entrepot
+      password: entrepot
+      port: 5432
+      dbname: entrepot
+      schema: emploi
+      threads: 4

@@ -1,0 +1,1 @@
+SELECT code,nom,code_reg,lat,long FROM emploi.departement;

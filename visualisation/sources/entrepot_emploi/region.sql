@@ -1,0 +1,1 @@
+SELECT code,nom,lat,long FROM emploi.region;

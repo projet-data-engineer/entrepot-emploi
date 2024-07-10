@@ -1,0 +1,1 @@
+SELECT * FROM emploi.fait_offre_emploi;

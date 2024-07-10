@@ -1,0 +1,279 @@
+version: 2
+
+sources:
+
+  - name: collecte_naf
+    schema: public
+    description: Données brutes nomenclature d’activités française – NAF rév. 2 
+    tables:
+      - name: naf2008_5_niveaux
+        description: Correspondance entre les 5 niveaux de la Nomenclature d’activités française – NAF rév. 2
+      - name: naf2008_liste_n1
+        description: Niveau 1 de la nomenclature NAF rév. 2
+      - name: naf2008_liste_n2
+        description: Niveau 2 de la nomenclature NAF rév. 2
+      - name: naf2008_liste_n3
+        description: Niveau 3 de la nomenclature NAF rév. 2
+      - name: naf2008_liste_n4
+        description: Niveau 4 de la nomenclature NAF rév. 2
+      - name: naf2008_liste_n5
+        description: Niveau 5 de la nomenclature NAF rév. 2
+
+  - name: collecte_sirene
+    schema: public
+    description: Données brutes base INSEE Sirene établissements actifs.
+    tables:
+      - name: sirene_etablissement
+        description: Etablissements actifs de la base INSEE Sirene.
+
+  - name: collecte_offre_emploi
+    schema: public
+    description: Offres d'emploi collectée depuis API francetravail.io
+    tables:
+      - name: offre_emploi
+        description: Offres d'emploi france Travail
+
+  - name: collecte_rome
+    schema: public
+    description: Nomenclature métiers ROME
+    tables:
+      - name: rome_grand_domaine
+        description: Grands domaines ROME
+        columns:
+          - name: code
+            description: Code du grand domaine. 1er caractère du code ROME (lettre majuscule)
+          - name: libelle
+            description: Libellé du grand domaine
+      - name: rome_domaine_professionnel
+        description: Domaines ROME
+        columns:
+          - name: code
+            description: Code du domaine professionnel. 3 premiers caractères du code ROME
+          - name: libelle
+            description: Libellé du domaine professionnel.
+      - name: rome_metier
+        description: Métiers ROME
+        columns:
+          - name: code
+            description: Code du métier ROME. Code ROME sur 5 caractères
+          - name: libelle
+            description: Libellé du métier ROME.
+
+
+  - name: collecte_cog_carto
+    schema: public
+    description: Données ADMIN EXPRESS COG CARTO Version 3.2
+    tables:
+
+      - name: cog_carto_region
+        description: Données géographiques des régions
+        columns:
+          - name: VERSION
+            description: Version sous la forme YYYY-MM-DD
+          - name: ID
+            description: Identifiant de la région
+          - name: NOM_M
+            description: Nom INSEE de la région en majuscules non accentuées.
+          - name: NOM
+            description: Nom INSEE de la région.
+          - name: INSEE_REG
+            description: Code INSEE de la région.
+          - name: geom
+            description: Limite géographique
+
+      - name: cog_carto_departement
+        description: Données géographiques des départements
+        columns:
+          - name: VERSION
+            description: Version sous la forme YYYY-MM-DD
+          - name: ID
+            description: Identifiant du département
+          - name: NOM_M
+            description: Nom INSEE du département en majuscules.
+          - name: NOM
+            description: Nom INSEE du département
+          - name: INSEE_DEP
+            description: Code INSEE du département.
+          - name: INSEE_REG
+            description: Code INSEE de la région à laquelle appartient le département.
+          - name: geom
+            description: Limite géographique
+
+      - name: cog_carto_commune
+        description: Données géographiques des communes
+        columns:
+          - name: VERSION
+            description: Version sous la forme YYYY-MM-DD
+          - name: ID
+            description: Identifiant de la commune
+          - name: NOM_M
+            description: Nom de la commune en majuscules
+          - name: NOM
+            description: Nom de la commune
+          - name: INSEE_COM
+            description: Code INSEE de la commune
+          - name: STATUT
+            description: Statut administratif
+          - name: POPULATION
+            description: Population de la commune
+          - name: INSEE_CAN
+            description: Code INSEE du canton
+          - name: INSEE_ARR
+            description: Code INSEE de l’arrondissement
+          - name: INSEE_DEP
+            description: Code INSEE du département
+          - name: INSEE_REG
+            description: Code INSEE de la région
+          - name: SIREN_EPCI
+            description: Code SIREN des EPCI
+          - name: geom
+            description: Limite géographique
+
+      - name: cog_carto_arrondissement_municipal
+        description: Données géographiques des départements
+        columns:
+          - name: VERSION
+            description: Version sous la forme YYYY-MM-DD
+          - name: ID
+            description: Identifiant de l’arrondissement municipal
+          - name: NOM_M
+            description: Nom de l’arrondissement municipal en majuscules
+          - name: NOM
+            description: Nom de l’arrondissement municipal
+          - name: INSEE_ARM
+            description: Code INSEE de l’arrondissement municipal
+          - name: INSEE_COM
+            description: Code INSEE de la commune de rattachement
+          - name: POPULATION
+            description: Population de l’arrondissement municipal
+          - name: geom
+            description: Limite géographique
+
+models:
+
+  - name: dim_naf
+    description: Dimension activité NAF
+    columns:
+      - name: code_1
+        description: Code du niveau 1
+      - name: libelle_1
+        description: Libellé du niveau 1
+      - name: code_2
+        description: Code du niveau 2
+      - name: libelle_2
+        description: Libellé du niveau 2
+      - name: code_3
+        description: Code du niveau 3
+      - name: libelle_3
+        description: Libellé du niveau 3
+      - name: code_4
+        description: Code du niveau 4
+      - name: libelle_4
+        description: Libellé du niveau 4
+      - name: code_5
+        description: Code du niveau 5
+      - name: libelle_5
+        description: Libellé du niveau 5
+
+  - name: dim_lieu
+    description: Dimention lieu. Commune ou arrondissement municipal, avec département et région dénormalisés.
+    columns:
+      - name: version
+        description: version. Format YYYY-MM-DD
+      - name: code
+        description: Code de la commune ou de l'arrondissement municipal
+      - name: code_parent
+        description: Code de la commune de rattachement pour un arrondissement municipal
+      - name: nom
+        description: Nom de la commune ou de l'arrondissement municipal
+      - name: population
+        description: Population de la commune ou de l'arrondissement municipal
+      - name: frontiere
+        description: Limite géographique de la commune ou de l'arrondissement municipal
+
+  - name: region
+    description: Régions avec limites géographiques
+    columns:
+      - name: version
+        description: version. Format YYYY-MM-DD
+      - name: code
+        description: Code de la région
+      - name: nom
+        description: Libellé de la région
+      - name: frontiere
+        description: Limite géographique de la région
+
+  - name: departement
+    description: Régions avec limites géographiques
+    columns:
+      - name: version
+        description: version. Format YYYY-MM-DD
+      - name: code
+        description: Code du département
+      - name: nom
+        description: Libellé du département
+      - name: frontiere
+        description: Limite géographique du département
+
+  - name: dim_lieu_activite
+    description: Dimension comptabilisation du nombre d'établissements pour une commune et une activité donnée
+    columns:
+      - name: version
+        description: version - format YYYY-MM - Mise à jour mensuelle
+      - name: code_commune
+        description: Code de la commune observée
+      - name: code_activite
+        description: Code d'activité NAF observé
+      - name: total
+        description: Nombre total d'établissement pour la commune et l'activité
+
+  - name: dim_rome
+    description: 3 niveaux nomenclature ROME dénormalisés.
+    columns:
+      - name: code_3
+        description: Code métier ROME sur 5 caractères
+      - name: libelle_3
+        description: Libellé métier ROME
+      - name: code_2
+        description: Code domaine professionnel ROME. 3 premiers caractères Code métier ROME
+      - name: libelle_2
+        description: Libellé domaine professionnel ROME
+      - name: code_1
+        description: Code grand domaine ROME. 1er caractère Code métier ROME (lettre)
+      - name: libelle_1
+        description: Libellé grand domaine ROME
+
+
+  - name: fait_offre_emploi
+    description: Table de faits. Offres d'emploi francetravail.io
+    columns:
+      - name: id
+        description: Identifiant de l’offre d’emploi
+      - name: date_creation
+        description: Date de création de l’offre
+      - name: lieu_travail_code
+        description: Code Insee du lieu de travail (code commune ou arrondissement municipal)
+      - name: lieu_travail_latitude
+        description: Latitude du lieu de travail
+      - name: lieu_travail_longitude
+        description: Longitude de lieu de travail
+      - name: code_naf
+        description: Code NAF
+      - name: code_rome
+        description: Code ROME de l’offre
+      - name: entreprise_adaptee
+        description: Flag entreprise adaptee
+      - name: type_contrat
+        description: Code du type de contrat proposé (CDD, CDI, etc.)
+      - name: nature_contrat
+        description: Nature du contrat (contrat d’apprentissage, etc.)
+      - name: experience_exige
+        description: E - l'expérience est exigée, S - l'expérience est souhaitée
+      - name: alternance
+        description: Vrai si c’est une offre pour de l’alternance
+      - name: nombre_postes
+        description: Nombre de postes disponibles pour cette offre
+      - name: accessible_TH
+        description: Vrai si l’offre est accessible aux travailleurs handicapés
+      - name: qualification_code
+        description: Qualification du poste. 1 - manœuvre, ... 8 agent de maitrise, 9 cadre

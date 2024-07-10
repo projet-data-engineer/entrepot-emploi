@@ -1,0 +1,10 @@
+.evidence/template
+static/*.geojson
+.svelte-kit
+build
+node_modules
+.DS_Store
+*.options.yaml
+.vscode/settings.json
+.env
+.evidence/meta

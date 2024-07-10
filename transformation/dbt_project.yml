@@ -1,0 +1,30 @@
+name: 'transformation'
+version: '1.0.0'
+profile: 'transformation'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  transformation:
+  
+    dim_naf:
+      +materialized: table
+    dim_lieu:
+      +materialized: table
+    region:
+      +materialized: table
+    departement:
+      +materialized: table
+    dim_lieu_activite:
+      +materialized: table
+    dim_rome:
+      +materialized: table
+    fait_offre_emploi:
+      +materialized: table

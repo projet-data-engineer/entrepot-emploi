@@ -1,0 +1,115 @@
+x-airflow-common:
+  &airflow-common
+  build: ./airflow
+  user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-50000}"
+  environment:
+    &airflow-common-env
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-repo:5432/airflow
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    _AIRFLOW_DB_MIGRATE: 'true'
+    AIRFLOW__CORE__TEST_CONNECTION: Enabled
+    TZ: Europe/Paris
+    AIRFLOW__WEBSERVER__DEFAULT_UI_TIMEZONE: Europe/Paris
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: Europe/Paris
+
+    PYTHONPATH: /opt/airflow/modules:$PYTHONPATH
+
+    FRANCETRAVAIL_HOST: ${FRANCETRAVAIL_HOST}
+    FRANCETRAVAIL_ID_CLIENT: ${FRANCETRAVAIL_ID_CLIENT}
+    FRANCETRAVAIL_CLE_SECRETE: ${FRANCETRAVAIL_CLE_SECRETE}
+
+    URI_STOCK_ETABLISSEMENT: ${URI_STOCK_ETABLISSEMENT}
+
+    URI_COG_CARTO: ${URI_COG_CARTO}
+    VERSION_COG_CARTO: ${VERSION_COG_CARTO}
+
+    # Emplacement collecte cog carto
+    DESTINATION_COG_CARTO: ${DESTINATION_RACINE}/${DOSSIER_COG_CARTO}
+    # Emplacement collecte nomenclature ROME
+    DESTINATION_ROME: ${DESTINATION_RACINE}/${DOSSIER_ROME}
+    # Emplacement collecte offres d'emploi
+    DESTINATION_OFFRE_EMPLOI: ${DESTINATION_RACINE}/${DOSSIER_OFFRE_EMPLOI}
+    # Emplacement collecte nomenclature activité NAF
+    DESTINATION_NAF: ${DESTINATION_RACINE}/${DOSSIER_NAF}
+    # Emplacement collecte établissements base Sirene
+    DESTINATION_SIRENE: ${DESTINATION_RACINE}/${DOSSIER_SIRENE}
+
+
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./collecte:/opt/airflow/modules/collecte
+    - ./chargement:/opt/airflow/modules/chargement
+    - ./transformation:/opt/airflow/modules/transformation
+    - ./visualisation/static:/visualisation
+    - ${DESTINATION_RACINE_LOCAL}:${DESTINATION_RACINE}
+    
+  networks:
+      - data-emploi
+
+services:
+
+  airflow-repo:
+    image: postgres:15.2
+    container_name: airflow-repo
+    environment:      
+      POSTGRES_USER : airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB : airflow
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+    networks:
+      - data-emploi
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    image: airflow-scheduler
+    command: scheduler
+    environment:
+      <<: *airflow-common-env
+    depends_on:
+      - airflow-repo
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    image: airflow-webserver
+    command: webserver
+    ports:
+      - "8070:8080"
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: 'airflow'
+      _AIRFLOW_WWW_USER_PASSWORD: 'airflow'
+      _AIRFLOW_WWW_USER_FIRSTNAME: 'D'
+      _AIRFLOW_WWW_USER_LASTNAME: 'E'
+      _AIRFLOW_WWW_USER_EMAIL: 'data.engineer.projet@gmail.com'
+      _AIRFLOW_WWW_USER_ROLE: 'Admin'
+    restart: always
+    depends_on:
+      - airflow-repo
+
+  entrepot:
+    image: postgres:15.2
+    container_name: entrepot
+    ports:
+      - "5432:5432"
+    environment:      
+      POSTGRES_USER : entrepot
+      POSTGRES_PASSWORD: entrepot
+      POSTGRES_DB : entrepot
+    restart: always
+    networks:
+      - data-emploi
+
+networks:
+  data-emploi:
+    name: data-emploi
+    driver: bridge

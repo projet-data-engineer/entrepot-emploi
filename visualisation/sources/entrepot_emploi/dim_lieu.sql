@@ -1,0 +1,1 @@
+SELECT code,code_parent,code_dep,code_reg,nom,population,lat,long FROM emploi.dim_lieu;

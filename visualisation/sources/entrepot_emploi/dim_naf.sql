@@ -1,0 +1,1 @@
+SELECT * FROM emploi.dim_naf;
