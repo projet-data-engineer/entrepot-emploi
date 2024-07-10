@@ -32,7 +32,7 @@ def chargement(version):
                     shp.insee_reg NOT IN ('01','02','03','04','06')
             ) 
             TO '{geojson_file_path}' 
-            WITH (FORMAT GDAL, DRIVER 'GeoJSON')
+            WITH (FORMAT GDAL, DRIVER 'GeoJSON', LAYER_CREATION_OPTIONS 'WRITE_BBOX=YES')
 
         """
         con.sql(SQL)
@@ -74,7 +74,7 @@ def chargement(version):
                     shp.insee_reg NOT IN ('01','02','03','04','06')
             ) 
             TO '{geojson_file_path}' 
-            WITH (FORMAT GDAL, DRIVER 'GeoJSON')
+            WITH (FORMAT GDAL, DRIVER 'GeoJSON', LAYER_CREATION_OPTIONS 'WRITE_BBOX=YES')
 
         """
         con.sql(SQL)
@@ -115,7 +115,7 @@ def chargement(version):
                     shp.insee_reg NOT IN ('01','02','03','04','06')
             ) 
             TO '{file_path}' 
-            WITH (FORMAT GDAL, DRIVER 'GeoJSON')
+            WITH (FORMAT GDAL, DRIVER 'GeoJSON', LAYER_CREATION_OPTIONS 'WRITE_BBOX=YES')
 
         """
 
@@ -158,7 +158,7 @@ def chargement(version):
                     '{shp_arrondissement_municipal}' AS shp
             ) 
             TO '{file_path}' 
-            WITH (FORMAT GDAL, DRIVER 'GeoJSON')
+            WITH (FORMAT GDAL, DRIVER 'GeoJSON', LAYER_CREATION_OPTIONS 'WRITE_BBOX=YES')
 
         """
 
