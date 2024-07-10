@@ -78,7 +78,10 @@ group by
     ]}
 />
 
-### BubbleMap
+### BaseMap pour repésenter plusieurs dimensions. 
+
+- les aires représente la population de chaque département, les bulles le nombre d'offres
+- voir pour meilleure palette de couleurs
 
 <BaseMap>
     <Areas 
