@@ -6,7 +6,7 @@
 ```sql population_lyon
 
 select 
-    code,nom,population,lat,long
+    code,nom,population
 from
     entrepot_emploi.dim_lieu
 where 
@@ -14,8 +14,6 @@ where
 ```
 
 <DataTable data={population_lyon}/>
-
-
 
 <AreaMap 
     data={population_lyon} 
