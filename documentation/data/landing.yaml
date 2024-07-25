@@ -1,6 +1,5 @@
-# Hero
 hero:
-  enable: true
+  enable: false
   weight: 10
   template: hero
 
@@ -10,36 +9,36 @@ hero:
       desktop: "gradient-desktop.webp"
       mobile: "gradient-mobile.webp"
 
-  badge:
-    text: v0.1.0
-    color: warning # primary, secondary, success, danger, warning, info, light, dark
-    pill: false # boolean
-    soft: true # boolean
-
   title: "Analyse des données d'offres d'emploi de France Travail.io"
   subtitle: Collecte quotidienne des offres d'emploi, afin de produire une analyse des données croisées avec d'autres jeux de données issus de l'Open Data.
-
-  image:
-    path: "images" # path to image under configured assets directory. default 'images'
-    filename: "vue-fonctionnelle.png" # filename of your hero image (including file extension)
-    alt: "Lotus Docs Screenshot" # Optional but recommended
-    boxShadow: true # default 'false' (excludes .svg images)
-    rounded: true # round the image corners? default 'false' (excludes .svg images)
 
   ctaButton:
     icon: article
     btnText: "Lire la documentation"
     url: "/entrepot-emploi/docs/"
 
-    
   cta2Button:
-    icon: construction
+    icon: code_blocks
     btnText: "Code source"
     url: "https://github.com/projet-data-engineer/entrepot-emploi"
 
-  info: "**Open Source** MIT Licensed."
 
-appImageCompare:
+featureGrid:
+
   enable: false
-  weight: 30
+  weight: 20
+  template: feature grid
+  title: "Analyse des données d'offres d'emploi de France Travail.io"
+  subtitle: Collecte quotidienne des offres d'emploi, afin de produire une analyse des données croisées avec d'autres jeux de données issus de l'Open Data.
+  items:
+  - title: Fast # 4
+    icon: speed # 3
+    description: 4 x 100's score on Google Lighthouse by default. Lotus Docs removes unused CSS, prefetches asset links, and lazy loads content images. # 5
+    ctaLink: # 6
+      text: learn more
+      url: /docs/
+
+imageCompare:
+  enable: false
   template: image compare
+  weight: 30

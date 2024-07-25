@@ -6,7 +6,7 @@ from airflow.operators.bash import BashOperator
 
 
 from collecte import collecte_offres
-from chargement import chargement_offres_date
+from chargement import chargement_offres
 
 
 local_tz = pendulum.timezone("Europe/Paris")
@@ -34,7 +34,7 @@ def pipeline_offres_date():
 
     @task
     def chargement(date_creation):
-        chargement_offres_date.chargement(date_creation=date_creation)
+        chargement_offres.chargement_offres_date(date_creation=date_creation)
 
     transformation = BashOperator(
 

@@ -1,10 +1,11 @@
 ---
-weight: 999
-title: "Analyse des données d'offres d'emploi de France Travail.io"
+weight: 100
+title: "Présentation du projet"
 description: ""
-icon: "article"
-date: "2024-07-20T10:30:30+02:00"
-lastmod: "2024-07-20T10:30:30+02:00"
+icon: "info"
+date: "2024-07-19T11:03:05+02:00"
+lastmod: "2024-07-19T11:03:05+02:00"
 draft: false
 toc: true
 ---
+

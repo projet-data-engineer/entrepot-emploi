@@ -108,8 +108,14 @@ services:
     restart: always
     networks:
       - data-emploi
+    volumes: 
+      - entrepot:/var/lib/postgresql/data
 
 networks:
   data-emploi:
     name: data-emploi
     driver: bridge
+
+volumes:
+  entrepot:
+    driver: local
