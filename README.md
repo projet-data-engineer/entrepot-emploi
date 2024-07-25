@@ -19,10 +19,6 @@ Développement d'une application d'analyse du marché de l'emploi à partir d'un
 
 ![vue-fonctionnelle](/assets/vue-fonctionnelle.png)
 
-## Principe général
-
-![principe_general](/assets/principe_general.png)
-
 ## Execution locale du projet
 
 ### Prérequis
