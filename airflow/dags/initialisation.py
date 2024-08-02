@@ -1,26 +1,19 @@
 from datetime import datetime, timedelta
 import pendulum
-from airflow.utils.task_group import TaskGroup
-from airflow.decorators import dag, task
-from chargement import chargement_naf
-from datetime import datetime
 import os
 import glob
 import pendulum
 import shutil
-from airflow.decorators import dag, task
-from airflow.operators.bash import BashOperator
 import py7zr
 import requests
-from chargement import chargement_cog_carto
-from airflow.operators.empty import EmptyOperator
-from collecte import collecte_rome
-from chargement import chargement_rome
-from collecte import collecte_sirene
-from chargement import chargement_sirene
 
-from collecte import collecte_offres
-from chargement import chargement_offres
+from airflow.decorators import dag, task
+from airflow.operators.bash import BashOperator
+from airflow.utils.task_group import TaskGroup
+from airflow.decorators import dag, task
+
+from chargement import chargement_cog_carto, chargement_naf, chargement_rome, chargement_sirene, chargement_offres
+from collecte import collecte_rome, collecte_sirene, collecte_offres, collecte_cog_carto
 
 local_tz = pendulum.timezone("Europe/Paris")
 
@@ -41,40 +34,15 @@ def initialisation():
 
         @task
         def telechargement():
-
-            nom_archive = os.path.join(os.getenv('DESTINATION_COG_CARTO'), f"{os.getenv('VERSION_COG_CARTO')}.7z")
-
-            if not os.path.exists(nom_archive):
-
-                print(f"Le fichier {nom_archive} absent. Téléchargement cog carto {os.getenv('VERSION_COG_CARTO')}...")
-                data = requests.get(os.getenv('URI_COG_CARTO'))
-                with open(nom_archive, 'wb') as file:
-                    file.write(data.content)
-
-            else:
-                print(f"Le fichier {nom_archive} est déjà présent")
+            collecte_cog_carto.telechargement()
 
         @task
         def decompactage():
-
-            nom_archive = os.path.join(os.getenv('DESTINATION_COG_CARTO'), f"{os.getenv('VERSION_COG_CARTO')}.7z")
-            with py7zr.SevenZipFile(nom_archive, mode='r') as z:
-                z.extractall(os.getenv('DESTINATION_COG_CARTO'))
+           collecte_cog_carto.decompactage()
 
         @task
         def filtrage():
-
-            termes = ['REGION','DEPARTEMENT', 'COMMUNE', 'ARRONDISSEMENT_MUNICIPAL']
-            paths = glob.glob(f"{os.getenv('DESTINATION_COG_CARTO')}/**/*", recursive=True)
-            files = [f for f in paths if os.path.isfile(f)]
-            shape_files = [f for f in files if f.split(sep='/')[-1].split(sep='.')[0] in termes]
-
-            destination = os.path.join(os.getenv('DESTINATION_COG_CARTO'), os.getenv('VERSION_COG_CARTO'))
-            if not os.path.exists(destination):
-                os.mkdir(destination)
-
-            for file in shape_files:
-                shutil.copy2(file, destination)
+            collecte_cog_carto.filtrage()
 
         @task
         def chargement_entrepot():

@@ -45,14 +45,29 @@ def chargement_offres_date(date_creation):
 
 def chargement_offres_stock():
 
+    """
+    offres-*.json: nous indiquons à DuckDB de prendre l'ensemble des fichiers JSON d'offres présents dans le dossier de stockage des données brutes
+    """
     file_path = os.path.join(os.getenv('DESTINATION_OFFRE_EMPLOI'), 'offres-*.json')
 
     with duckdb.connect() as con:
 
+        """
+        Les deux commandes suivantes charge l'extension PostgreSQL.
+        L'extension PostgreSQL permet à DuckDB de lire et écrire directement depuis une instance de base de données Postgres.
+        """
         con.install_extension("postgres")
         con.load_extension("postgres")
 
+        # La commande ATTACH permet d'ajouter une connexion vers l'instance Postgres et accessible sous le nom 'entrepot'
         con.sql("ATTACH 'dbname=entrepot user=entrepot password=entrepot host=entrepot' AS entrepot (TYPE POSTGRES);")
+
+        """
+        Pré-transformation puis chargement
+        - conversion de format: il peut arriver qu'un système de base de données interprète mal un format de données.
+        Les attributs dateCreation et qualificationCode sont convertis explicitement.
+        - filtrage des attributs chargés dans l'entrepôt (nous chargons uniquement les attributs dont nous avons besoin)
+        """
 
         SQL = f"""
         

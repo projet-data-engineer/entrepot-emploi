@@ -19,6 +19,11 @@ title = "Analyse des données d'offres d'emploi de France Travail.io"
     identifier = "docs"
     weight = 10
 
+[params]
+    google_fonts = [["Roboto", "100, 200, 300"]]
+    sans_serif_font = "Roboto"
+    secondary_font = "Roboto"
+
 [params.flexsearch]
     enabled = false
 
@@ -26,6 +31,11 @@ title = "Analyse des données d'offres d'emploi de France Travail.io"
     darkMode = true
     sidebarIcons = true
     titleIcon = true
+    themeColor = "yellow"
+    descriptions = true
+    prismTheme = "lucario"
 
 [params.social]
     github = "projet-data-engineer/entrepot-emploi"
+
+

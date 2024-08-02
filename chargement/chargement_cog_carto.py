@@ -56,9 +56,9 @@ def chargement(version):
         con.execute("SELECT COUNT(*) FROM entrepot.cog_carto_region")
         print(f"\n\nChargement de {con.fetchone()[0]} regions !\n\n")
 
-
-
-
+        """
+        Export de certaines métadonnées et de la géométrie dans un fichier GeoJSON departement-metropole.geojson
+        """
         geojson_file_path = os.path.join('/visualisation', 'departement-metropole.geojson')
 
         SQL = f"""
