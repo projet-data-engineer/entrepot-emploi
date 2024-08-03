@@ -10,27 +10,31 @@ toc: true
 ---
 
 
-## dbt
+## Présentation
 
 ![logo-duckdb](/images/dbt.png)
 
 **dbt (Data Build Tool)** est un outil open source utilisé pour transformer, organiser et gérer les données dans un entrepôt de données (data warehouse).
 
 {{% alert context="success" %}}
-**dbt**, via son outil dbt-core est l'un des promoteur du **modèle ELT** désormais largement adopté, où les données sont chargées dans dans l'entrepôt de données, puis transformées _en place_, par opposition au modèle traditionnel **ETL**, où les données sont transformées puis chargées dans l'entrepôt.
+**dbt**  est l'un des promoteur du [**modèle ELT**](https://docs.getdbt.com/terms/elt) désormais largement adopté, où les données sont chargées dans dans l'entrepôt de données, puis transformées _en place_, par opposition au modèle traditionnel **ETL**, où les données sont transformées puis chargées dans l'entrepôt.
 {{% /alert %}}
 
-{{% alert context="success" %}}
-La **documentation dbt** des transformations et modèles de données du projet est consultable [ici](https://projet-data-engineer.github.io/entrepot-emploi-dbt-docs) via `GitHub Pages`.
-{{% /alert %}}
+- Dans ce projet, nous utilisons dbt au travers des fonctionnalités suivantes:
 
-- **Transformation**: DBT permet de définir des transformations SQL de manière organisée et réutilisable. Les transformations sont écrites sous forme de scripts SQL, et DBT gère leur exécution de manière séquentielle.
+  - **Transformation**: dbt permet de définir des transformations SQL de manière organisée et réutilisable. Les transformations sont écrites sous forme de requêtes SQL de sélection, et dbt gère leur exécution.
 
-- **Documentation**: DBT génère automatiquement de la documentation pour les transformations et les modèles de données. Cela facilite la compréhension et le partage de la logique de transformation et de la structure des données au sein de l'équipe.
+  - **Documentation**: dbt permet de génerer un site statique de documentation des transformations et des modèles de données. [**Accéder à la documentation dbt du projet**](https://projet-data-engineer.github.io/entrepot-emploi-dbt-docs)
 
-- **Tests**: Il permet d'écrire et d'exécuter des tests pour vérifier l'intégrité et la qualité des données après les transformations. Les tests peuvent vérifier des conditions telles que l'absence de valeurs nulles ou la conformité aux schémas attendus.
+  - **Orchestration**: dbt organise et orchestre l'exécution des transformations de données, en garantissant que les dépendances entre les différentes étapes sont respectées et que les transformations sont exécutées dans le bon ordre. De la même manière qu'avec Apache Airflow, des DAG (Directed Acyclic Graph) sont générés par DBT en fonction de dépendances entre les modèles de transformation.
 
-- **Orchestration**: DBT organise et orchestre l'exécution des transformations de données, en garantissant que les dépendances entre les différentes étapes sont respectées et que les transformations sont exécutées dans le bon ordre. De la même manière qu'avec Apache Airflow, des DAG (Directed Acyclic Graph) sont générés par DBT en fonction de dépendances entre les modèles de transformation.
+## Positionnement de dbt avec l'entrepôt de données
+
+- Les données brutes sont poussées par le moeur de chargement DuckDB dans le schéma public de l'entrepôt PostgreSQL (le schéma public est un schéma par défaut dans une base postgres).
+- Le schéma d'emplacement des données brutes est parametré dans dbt dans ses sources de données (cf. plus bas schema.yml).
+- Le schéma cible est le schéma entrepot. Il est parametré dans les connexions de dbt (cf. plus bas profile.yml).
+
+![entrepot-schemas](/images/entrepot-schemas.png)
 
 ## Création d'un projet dbt
 
@@ -447,13 +451,108 @@ order by
 
 
 ### dim_rome
+
+- La transformation dim_rome effectue une dénormalisation des 3 niveaux de la normenclature ROME
+
+![dim_rome](/images/dim_rome.png)
+
+<u>Aperçu de la table dim_rome générée par dbt run:</u>
+
+{{< table >}}
+|code_3|libelle_3|code_2|libelle_2|code_1|libelle_1|
+|------|---------|------|---------|------|---------|
+|M1405|Data scientist|M14|Organisation et études|M|Support à l'entreprise|
+|M1811|Data engineer|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1812|Responsable de la Sécurité des Systèmes d'Information (RSSI)|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1813|Intégrateur / Intégratrice logiciels métiers|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1804|Ingénieur / Ingénieure télécoms|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1805|Développeur / Développeuse web|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1806|Product Owner|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1807|Opérateur / Opératrice télécom aux armées|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1808|Cartographe|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1809|Météorologue|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1810|Technicien / Technicienne informatique|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1401|Enquêteur / Enquêtrice sondage|M14|Organisation et études|M|Support à l'entreprise|
+|M1803|Directeur / Directrice des services informatiques -DSI-|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1802|Ingénieur / Ingénieure système informatique|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+|M1801|Administrateur / Administratrice réseau informatique|M18|Systèmes d'information et de télécommunication|M|Support à l'entreprise|
+{{< /table >}}
+
 ### dim_lieu
-### departement
-### region
+
+- Le code INSEE du lieu de travail d'une offre correspond à une commune ou à un arrondissement municipal. 
+- La transformation dim_lieu fusionne les enregistrements des communes et des arrondissements municipaux dans une seule table dim_lieu, afin de simplifier 
+les comptabilisations basées sur la localisation des offres.
+- Un attribut code_parent est valorisé pour une commune avec son code (dans ce cas code = code_parent), ou avec le code de la commune de rattachement pour un arrondissement municipal. 
+  - commune: code = code_parent
+  - arrondissement municipal = code != code_parent
+
+![dim_lieu](/images/dim_lieu.png)
+
+### region et departement
+
+- Les modèles region et departement se contentent de renommer certains attributs et de charger les données dans le schéma entrepot.
+
 ### dim_lieu_activite
+
+- Le modèle dim_lieu_activite effectue une comptabilisation du nombre d'établissements d'entreprise par code d'activité NAF et par lieu.
+
 ### fait_offre_emploi
 
+- Le modèle fait_offre_emploi charge les offres d'emploi de manière incrémentale
+- Le template ci-dessous indique que seuls les nouveaux enregistrements doivent être pris en compte, identifiés grâce à l'unique key "id"
+
+```text
+{{
+    config(
+        materialized='incremental',
+        unique_key='id'
+    )
+}}
+```
+
+## DAG global
+
+![dbt-dag](/images/dbt-dag.png)
+
+
+## Execution d'un projet dbt
+
+- Un projet dbt s'execute avec la commande `dbt run`.
+
+```bash
+dbt run
+13:34:55  Running with dbt=1.8.3
+13:34:56  Registered adapter: postgres=1.8.2
+13:34:57  Found 7 models, 15 sources, 415 macros
+13:34:57  
+13:34:59  Concurrency: 4 threads (target='dev')
+13:34:59
+13:34:59  1 of 7 START sql incremental model emploi.departement .......................... [RUN]
+13:34:59  2 of 7 START sql incremental model emploi.dim_lieu ............................. [RUN]
+13:34:59  3 of 7 START sql table model emploi.dim_lieu_activite .......................... [RUN]
+13:34:59  4 of 7 START sql table model emploi.dim_naf .................................... [RUN]
+13:35:00  4 of 7 OK created sql table model emploi.dim_naf ............................... [SELECT 732 in 0.20s]
+13:35:00  5 of 7 START sql incremental model emploi.dim_rome ............................. [RUN]
+13:35:00  1 of 7 OK created sql incremental model emploi.departement ..................... [INSERT 0 101 in 0.23s]
+13:35:00  6 of 7 START sql incremental model emploi.fait_offre_emploi .................... [RUN]
+13:35:00  5 of 7 OK created sql incremental model emploi.dim_rome ........................ [INSERT 0 609 in 0.11s]
+13:35:00  7 of 7 START sql table model emploi.region ..................................... [RUN]
+13:35:00  2 of 7 OK created sql incremental model emploi.dim_lieu ........................ [INSERT 0 34980 in 0.43s]
+13:35:00  7 of 7 OK created sql table model emploi.region ................................ [SELECT 18 in 0.14s]
+13:35:00  6 of 7 OK created sql incremental model emploi.fait_offre_emploi ............... [INSERT 0 31624 in 0.85s]
+13:35:09  3 of 7 OK created sql table model emploi.dim_lieu_activite ..................... [SELECT 2561519 in 9.75s]
+13:35:09
+13:35:09  Finished running 3 table models, 4 incremental models in 0 hours 0 minutes and 12.34 seconds (12.34s).
+13:35:09  
+13:35:09  Completed successfully
+13:35:09
+13:35:09  Done. PASS=7 WARN=0 ERROR=0 SKIP=0 TOTAL=7
+```
+
 ## Génération de la documentation
+
+- La documentation peut être générée avec la commande `dbt docs generate`. Cela génère un site statique qui rend son hébergement aisé, via [**GitHub Pages pour ce projet**](https://projet-data-engineer.github.io/entrepot-emploi-dbt-docs).
 
 ```bash
 dbt docs generate
@@ -467,3 +566,28 @@ dbt docs generate
 11:42:24  Building catalog
 11:42:24  Catalog written to C:\privé\DE\entrepot-emploi-transformation\transformation\target\catalog.json
 ```
+
+- La documentation générée peut être visualisée localement via la commande `dbt docs serve`
+
+```bash
+dbt docs serve
+
+13:36:30  Running with dbt=1.8.3
+Serving docs at 8080
+To access from your browser, navigate to: http://localhost:8080
+
+Press Ctrl+C to exit.
+127.0.0.1 - - [03/Aug/2024 15:36:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Aug/2024 15:36:31] "GET /manifest.json?cb=1722692191330 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Aug/2024 15:36:31] "GET /catalog.json?cb=1722692191330 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Aug/2024 15:36:31] code 404, message File not found
+127.0.0.1 - - [03/Aug/2024 15:36:31] "GET /$%7Brequire('./assets/favicons/favicon.ico')%7D HTTP/1.1" 404 -
+```
+
+## Mise en oeuvre
+
+- Le traitement de transformation dbt est executé par `Airflow` via un `BashOperator` executant la commande `dbt run --target prod`
+
+## Schéma en étoile de notre entrepôt de données
+
+![schema-etoile](/images/schema-etoile.png)
