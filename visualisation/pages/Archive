@@ -1,0 +1,538 @@
+<!-- 
+
+```sql test_departements_1
+SELECT * FROM dim_lieu LIMIT 10;
+```
+
+```sql test_departements_2
+SELECT * FROM dim_lieu_activite LIMIT 10;
+```
+
+```sql test_departements_3
+SELECT
+    dl.nom AS nom_departement,
+    dla.code_activite
+FROM
+    dim_lieu_activite dla
+JOIN
+    dim_lieu dl ON dla.code_commune = dl.code
+LIMIT 10;
+```
+
+```sql test_4
+```
+
+```sql test_5
+```
+
+
+
+
+
+```sql Nom_des_colonnes
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'fait_offre_emploi'
+```
+```sql code_naf
+Select distinct code_naf as category
+FROM fait_offre_emploi
+```
+
+
+
+```sql code_rome
+Select distinct code_rome as category
+FROM fait_offre_emploi
+```
+
+
+```sql date_creation
+Select distinct date_creation as day
+FROM fait_offre_emploi
+```
+
+```sql type_contrat
+Select distinct type_contrat as category
+FROM fait_offre_emploi
+```
+
+
+```sql nature_contrat
+Select distinct nature_contrat as category
+FROM fait_offre_emploi
+```
+
+
+```sql experience_exige
+Select distinct experience_exige as category
+FROM fait_offre_emploi
+```
+
+
+```sql qualification_code
+Select distinct qualification_code as category
+FROM fait_offre_emploi
+```
+
+
+```sql alternance
+Select distinct alternance as category
+FROM fait_offre_emploi
+```
+
+
+```sql lieu_travail_code
+Select distinct lieu_travail_code as category
+FROM fait_offre_emploi
+```
+
+<DateRange
+    name=selected_date_creation
+    data={date_creation}
+    dates=day
+/>
+
+<Dropdown 
+    data={code_naf} 
+    name=selected_code_naf
+    value=category
+    multiple=true
+/>
+<Dropdown 
+    data={code_rome} 
+    name=selected_code_rome
+    value=category
+    multiple=true
+/>
+<Dropdown 
+    data={type_contrat} 
+    name=selected_type_contrat 
+    value=category
+    multiple=true
+/>
+<Dropdown 
+    data={nature_contrat} 
+    name=selected_nature_contrat 
+    value=category
+    multiple=true
+/>
+<Dropdown 
+    data={experience_exige} 
+    name=selected_experience_exige
+    value=category
+    multiple=true
+/>
+<Dropdown 
+    data={qualification_code} 
+    name=selected_qualification_code
+    value=category
+    multiple=true
+/>
+<Dropdown 
+    data={alternance} 
+    name=selected_alternance
+    value=category
+    multiple=true
+/>
+<Dropdown 
+    data={lieu_travail_code} 
+    name=selected_lieu_travail_code
+    value=category
+    multiple=true
+/>
+
+```sql test8
+select 
+    *
+from fait_offre_emploi
+where code_naf like '${inputs.selected_code_naf}'
+where code_rome like '${inputs.selected_code_rome}'
+where type_contrat like '${inputs.selected_type_contrat}'
+where nature_contrat like '${inputs.selected_nature_contrat}'
+where experience_exige like '${inputs.selected_experience_exige}'
+where qualification_code like '${inputs.selected_qualification_code}'
+where alternance like '${inputs.selected_alternance}'
+where lieu_travail_code like '${inputs.selected_lieu_travail_code}'
+group by all
+``` 
+-->
+
+<!-- 
+ ```sql code_naf
+ select *
+ from dim_rome
+ ```
+
+<DimensionGrid 
+    data={code_naf} 
+    name="dimensiongrid_code_naf"
+    limit=15
+/>
+
+ 
+```sql filtered_query_code_naf
+select code_3
+from dim_rome
+where ${inputs.dimensiongrid_code_naf}
+```
+
+```sql metier_rome_departement
+
+with 
+lieu as (
+    select code, code_dep
+    from entrepot_emploi.dim_lieu 
+    where code = code_parent
+),
+departement as (
+    select code, nom, lat, long 
+    from entrepot_emploi.departement
+)
+select
+	departement.code,
+	departement.nom,
+	departement.lat,
+	departement.long,
+	count(*) as nombre,
+from 
+	departement
+join
+	lieu on departement.code = lieu.code_dep
+join
+	entrepot_emploi.fait_offre_emploi as fait_offre_emploi on fait_offre_emploi.lieu_travail_code = lieu.code
+where
+	fait_offre_emploi.code_rome =${filtered_query_code_naf}
+    and departement.code not in ('971','972','973','974','976')
+group by
+	departement.code,departement.nom,departement.lat,departement.long
+```
+
+
+<AreaMap 
+    data={metier_rome_departement} 
+    areaCol=code
+    geoJsonUrl='/departement-metropole.geojson'
+    geoId=INSEE_DEP
+    value=nombre
+    height=500
+    opacity=0.5
+    tooltip={[
+        {id: 'nom', showColumnName: false, valueClass: 'text-xl font-semibold'},
+        {id: 'nombre', fieldClass: 'text-[grey]', valueClass: 'text-[green]'}
+    ]}
+/> -->
+
+
+ ```sql code_naf
+ select *
+ from dim_rome
+ ```
+
+<DimensionGrid 
+    data={code_naf} 
+    name="dimensiongrid_code_naf"
+    limit=15
+/>
+
+ 
+```sql filtered_query_code_naf
+select code_3
+from dim_rome
+where ${inputs.dimensiongrid_code_naf}
+```
+
+```sql metier_rome_departement
+
+with 
+lieu as (
+    select code, code_dep
+    from entrepot_emploi.dim_lieu 
+    where code = code_parent
+),
+departement as (
+    select code, nom, lat, long 
+    from entrepot_emploi.departement
+)
+select
+	departement.code,
+	departement.nom,
+	departement.lat,
+	departement.long,
+	count(*) as nombre,
+from 
+	departement
+join
+	lieu on departement.code = lieu.code_dep
+join
+	entrepot_emploi.fait_offre_emploi as fait_offre_emploi on fait_offre_emploi.lieu_travail_code = lieu.code
+where
+	fait_offre_emploi.code_rome =${filtered_query_code_naf}
+    and departement.code not in ('971','972','973','974','976')
+group by
+	departement.code,departement.nom,departement.lat,departement.long
+```
+
+
+<AreaMap 
+    data={metier_rome_departement} 
+    areaCol=code
+    geoJsonUrl='/departement-metropole.geojson'
+    geoId=INSEE_DEP
+    value=nombre
+    height=500
+    opacity=0.5
+    tooltip={[
+        {id: 'nom', showColumnName: false, valueClass: 'text-xl font-semibold'},
+        {id: 'nombre', fieldClass: 'text-[grey]', valueClass: 'text-[green]'}
+    ]}
+/>
+
+
+```sql print_departement
+select *
+from departement
+limit 5
+```
+
+```sql print_dim_lieu_activite
+select *
+from dim_lieu_activite
+limit 5
+```
+```sql print_dim_lieu
+select *
+from dim_lieu
+limit 5
+```
+```sql print_dim_naf
+select *
+from dim_naf
+limit 5
+```
+```sql print_dim_rome
+select *
+from dim_rome
+limit 5
+```
+```sql print_fait_offre_emploi
+select *
+from fait_offre_emploi
+limit 5
+```
+```sql print_region
+select *
+from region
+limit 5
+```
+
+
+----
+
+## Objectif
+
+Identifier les communes ou régions ayant une forte concentration de certains métiers.
+On calcule le ratio du nombre de métiers par commune, département ou région. On peut rapporter ça au nombre d'habitant par la suite.
+
+On voit également la diversité des métiers en comptant le nombre distinct de codes d'activités présents dans chaque commune.
+
+```sql liste_communes
+SELECT 
+    code, nom
+FROM
+    dim_lieu;
+```
+
+<Dropdown
+    name=code_commune
+    data={liste_communes}
+    value=code
+/>
+
+
+```sql code_activite_not_in_commune
+SELECT dn.code_5
+FROM dim_naf dn
+WHERE dn.code_5 NOT IN (
+    SELECT dn_inner.code_5
+    FROM dim_lieu_activite dla
+    RIGHT JOIN dim_naf dn_inner ON dla.code_activite = dn_inner.code_5
+    WHERE dla.code_commune = '${inputs.code_commune.value}'
+);
+```
+
+
+ ```sql code_activite_in_commune
+SELECT dn_inner.code_5
+FROM dim_lieu_activite dla
+RIGHT JOIN dim_naf dn_inner ON dla.code_activite = dn_inner.code_5
+WHERE dla.code_commune = '${inputs.code_commune.value}';
+```
+
+
+
+```sql ratio_activite_not_in_commune
+WITH not_in_commune AS (
+    SELECT COUNT(dn.code_5) AS count_not_in_commune
+    FROM dim_naf dn
+    WHERE dn.code_5 NOT IN (
+        SELECT dn_inner.code_5
+        FROM dim_lieu_activite dla
+        RIGHT JOIN dim_naf dn_inner ON dla.code_activite = dn_inner.code_5
+        WHERE dla.code_commune = '${inputs.code_commune.value}'
+    )
+),
+total AS (
+    SELECT COUNT(DISTINCT dn.code_5) AS total_count
+    FROM dim_naf dn
+)
+SELECT
+    not_in_commune.count_not_in_commune,
+    total.total_count,
+    CAST(not_in_commune.count_not_in_commune AS FLOAT) / CAST(total.total_count AS FLOAT) AS ratio
+FROM not_in_commune, total;
+```
+
+```sql ratio_activite_for_all
+WITH in_commune AS (
+    SELECT 
+        dla.code_commune AS code_commune,
+        COUNT(DISTINCT dla.code_activite) AS count_in_commune
+    FROM dim_lieu_activite dla
+    GROUP BY dla.code_commune
+),
+total AS (
+    SELECT COUNT(DISTINCT dn.code_5) AS total_count
+    FROM dim_naf dn
+)
+SELECT
+    ic.code_commune,
+    ic.count_in_commune,
+    t.total_count,
+    CAST((t.total_count - ic.count_in_commune) AS FLOAT) / CAST(t.total_count AS FLOAT) AS ratio
+FROM 
+    in_commune ic
+    CROSS JOIN total t; 
+    
+```
+
+
+## What's Next?
+- Utiliser les données graphiques pour faire une première heatmap avec les région avec le plus d'offre. 
+    - Pour ça on peut utiliser en numéraire et une deuxième ou on rapporte au nombre de personne dans la région
+ ----
+ 
+
+ # Maps
+
+
+## Population par arrondissement à Lyon
+
+```sql population_lyon
+
+select 
+    code,nom,population
+from
+    entrepot_emploi.dim_lieu
+where 
+    code_parent = '69123'
+```
+
+<DataTable data={population_lyon}/>
+
+<AreaMap 
+    data={population_lyon} 
+    areaCol=code
+    geoJsonUrl='/arrondissement_municipal.geojson'
+    geoId=INSEE_ARM
+    value=population
+    height=500
+    opacity=0.5
+    tooltip={[
+        {id: 'nom', showColumnName: false, valueClass: 'text-xl font-semibold'},
+        {id: 'population', fieldClass: 'text-[grey]', valueClass: 'text-[green]'}
+    ]}
+/>
+
+
+## Répartition des offres d'emploi de Data Engineer par département
+
+```sql metier_rome_departement
+with 
+lieu as (
+    select code,code_dep,population from entrepot_emploi.dim_lieu where code = code_parent
+),
+departement as (
+    select code,nom,lat,long from entrepot_emploi.departement
+)
+select
+	departement.code,
+	departement.nom,
+	departement.lat,
+	departement.long,
+	count(*) as nombre,
+    sum(lieu.population) as population
+from 
+	departement
+join
+	lieu on departement.code = lieu.code_dep
+join
+	entrepot_emploi.fait_offre_emploi as fait_offre_emploi on fait_offre_emploi.lieu_travail_code = lieu.code
+where
+	fait_offre_emploi.code_rome = 'M1811'
+    and departement.code not in ('971','972','973','974','976')
+group by
+	departement.code,departement.nom,departement.lat,departement.long
+```
+
+<DataTable data={metier_rome_departement}/>
+
+### AreaMap
+
+<AreaMap 
+    data={metier_rome_departement} 
+    areaCol=code
+    geoJsonUrl='/departement-metropole.geojson'
+    geoId=INSEE_DEP
+    value=nombre
+    height=500
+    opacity=0.5
+    tooltip={[
+        {id: 'nom', showColumnName: false, valueClass: 'text-xl font-semibold'},
+        {id: 'nombre', fieldClass: 'text-[grey]', valueClass: 'text-[green]'}
+    ]}
+/>
+
+### BaseMap pour repésenter plusieurs dimensions. 
+
+- les aires représente la population de chaque département, les bulles le nombre d'offres
+- voir pour meilleure palette de couleurs
+
+<BaseMap>
+    <Areas 
+        data={metier_rome_departement} 
+        areaCol=code
+        geoJsonUrl='/departement-metropole.geojson'
+        geoId=INSEE_DEP
+        value=population
+        colorPalette={['yellow','orange','red','darkred']}
+        tooltip={[
+            {id: 'nom', showColumnName: false, valueClass: 'text-xl font-semibold'},
+            {id: 'population', fieldClass: 'text-[grey]', valueClass: 'text-[green]'}
+        ]}
+    />
+
+    <Bubbles
+        data={metier_rome_departement} 
+        lat=lat 
+        long=long 
+        size=nombre
+        value=nombre 
+        pointName=nom
+        height=500
+    />
+
+</BaseMap>
+
+
+
