@@ -1,0 +1,41 @@
+baseURL = "https://projet-data-engineer.github.io"
+languageCode = "en-us"
+title = "Analyse des données d'offres d'emploi de France Travail.io"
+
+[module]
+    [[module.imports]]
+        path = "github.com/colinwilson/lotusdocs"
+        disable = false
+    [[module.imports]]
+        path = "github.com/gohugoio/hugo-mod-bootstrap-scss/v5"
+        disable = false
+
+[markup.goldmark.renderer]
+    unsafe = true
+
+[[menu.primary]]
+    name  = "Documentation"
+    url = "/docs/"
+    identifier = "docs"
+    weight = 10
+
+[params]
+    google_fonts = [["Roboto", "100, 200, 300"]]
+    sans_serif_font = "Roboto"
+    secondary_font = "Roboto"
+
+[params.flexsearch]
+    enabled = false
+
+[params.docs]
+    darkMode = true
+    sidebarIcons = true
+    titleIcon = true
+    themeColor = "yellow"
+    descriptions = true
+    prismTheme = "lucario"
+
+[params.social]
+    github = "projet-data-engineer/entrepot-emploi"
+
+
