@@ -21,7 +21,7 @@ Développement d'une application d'analyse du marché de l'emploi à partir d'un
 
 ## Execution locale du projet
 
-### Prérequis
+Prérequis
 
   - Inscription sur la plateforme [francetravail.io](https://francetravail.io/inscription)
   - Créer une application sur la plateforme et y ajouter l'**API Offres d'emploi**
@@ -69,27 +69,11 @@ docker-compose build
 docker-compose up -d
 ```
 
-### Executer les DAG's Airflow
-
-  - pipeline_cog_carto
-  - pipeline_naf
-  - pipeline_offres_date
-  - pipeline_rome
-  - pipeline_sirene
-
-### Charger l'ensemble des fichiers de collecte d'offres d'emploi présents dans le dossier donnees_brutes/offre_emploi (Optionnel)
-
-- executer localement le script Python chargement/chargement_offres_stock.py
-- executer la transformation dbt depuis /transformation
-
-```powershell
-cd .\transformation\
-dbt run
-```
+### Executer le DAG Airflow _initialisation_
 
 ### Execution du projet visualisation - Evidence
 
-- Note: les fichiers geojson utilisés par les visualisations spatiales sont créés par le script chargement/chargement_cog_carto.py executé par le DAG pipeline_cog_carto
+- Note: les fichiers geojson utilisés par les visualisations spatiales sont créés par le script chargement/chargement_cog_carto.py executé par le DAG initialisation.
 
 ```powershell
 cd .\visualisation\
