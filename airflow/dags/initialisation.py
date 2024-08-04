@@ -1,11 +1,7 @@
 from datetime import datetime, timedelta
 import pendulum
 import os
-import glob
 import pendulum
-import shutil
-import py7zr
-import requests
 
 from airflow.decorators import dag, task
 from airflow.operators.bash import BashOperator

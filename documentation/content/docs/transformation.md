@@ -588,6 +588,16 @@ Press Ctrl+C to exit.
 
 - Le traitement de transformation dbt est executé par `Airflow` via un `BashOperator` executant la commande `dbt run --target prod`
 
-## Schéma en étoile de notre entrepôt de données
+## Schéma en étoile de l'entrepôt de données
+
+### Notion de modèle en étoile
+
+- Le **modèle en étoile** est une approche de modélisation de bases de données utilisée dans les entrepôts de données pour l'analyse des données. Il se caractérise par une table centrale appelée "table de faits" qui est reliée à plusieurs tables périphériques appelées "tables de dimensions".
+
+- **Table de fait**: La table de faits contient les données quantitatives (mesures) que l'on souhaite analyser. Chaque enregistrement dans la table de faits représente une occurrence d'un événement ou une transaction. **Ici, il s'agit de nos offres d'emploi**.
+
+- **Table de dimension**: Les tables de dimensions contiennent des données descriptives qui fournissent des informations contextuelles sur les faits. Elles sont utilisées pour regrouper, filtrer, et segmenter les données de la table de faits. Ex: dim_lieu, dim_naf, dim_rome.
+
+- On parle parfois également d'une variante nommée **modèle en flocons**, lorsque certaines tables de dimensions sont liées à d'autres tables. Par exemple dans notre modèle, la table **dim_lieu** fait référence aux tables **departement** et **région**. A noter que les tables dim_lieu, departement et region auraient pu être dénormalisées dans une seules table afin de simplifier le modèle.
 
 ![schema-etoile](/images/schema-etoile.png)

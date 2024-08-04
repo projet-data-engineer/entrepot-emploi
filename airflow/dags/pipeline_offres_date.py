@@ -4,10 +4,8 @@ import pendulum
 from airflow.decorators import dag, task
 from airflow.operators.bash import BashOperator
 
-
 from collecte import collecte_offres
 from chargement import chargement_offres
-
 
 local_tz = pendulum.timezone("Europe/Paris")
 
