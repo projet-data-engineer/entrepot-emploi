@@ -97,9 +97,11 @@ def initialisation():
 
 - **pipeline_offres_date**: ce DAG est programmé tous les jours à 01h00 ( `0 1 * * *` ), et collecte et charge dans l'entrepôt les offres d'emploi créées la veille.
 
-- **pipeline_offres_stock**: l'execution de ce DAG n'est pas programmé. Il doit peut executé manuellement pour charger un ensemble de fichiers de collecte d'offres présents dans le dossier /donnees/brutes/offre_emploi.
+- **pipeline_offres_stock**: l'execution de ce DAG n'est pas programmé. Il doit être executé manuellement pour charger un ensemble de fichiers de collecte d'offres présents dans le dossier /donnees/brutes/offre_emploi.
 
 ![liste-dag](/images/orchestration/liste-dag.png)
+
+---
 
 ## DAG _initialisation_
 
@@ -131,7 +133,7 @@ L'execution des differents TaskGroup est parallèlisée grâce à la notation []
 [nomenclature_naf(), cog_carto, nomenclature_rome, sirene, offres_emploi_du_jour] >> stock_offres_chargement
 ```
 
-## DAG _pipeline_offres_date_
+## DAG _pipeline_offres_date
 
 - Il s'agit du DAG de _marche courante_, executé quotidiennement à 01h00.
 - Son temps d'execution est d'environ 5 min pour 50 000 offres collectées.
@@ -278,6 +280,127 @@ Fin collecte de 50171/50175 offres en date du 2024-08-01
 [2024-08-04, 11:26:16 CEST] {taskinstance.py:441} ▶ Post task execution logs
 ```
 
+## DAG pipeline_offres_stock
+
+- Ce DAG n'est pas programmé
+- Il doit peut executé manuellement pour charger un ensemble de fichiers de collecte d’offres présents dans le dossier /donnees/brutes/offre_emploi
+- Son temps d'execution dépend du nombre de fichiers à charger.
+- Le traitement de transformation dbt est executé par la commande `dbt run --target prod` via un `BashOperator` dans le dossier _/opt/airflow/modules/transformation_ monté via un volume Docker. 
+
+![offres-stock-tasks](/images/orchestration/offres-stock-tasks.png)
+
+![offres-stock-graph](/images/orchestration/offres-stock-graph.png)
+
+```python
+from datetime import datetime, timedelta
+import pendulum
+
+from airflow.decorators import dag, task
+from airflow.operators.bash import BashOperator
+
+from chargement import chargement_offres
+
+
+local_tz = pendulum.timezone("Europe/Paris")
+
+"""
+Chargement et transformation du stock de fichiers brutes d'offres présents dans le dossier donnees_brutes.
+"""
+
+@dag(
+    dag_id="pipeline_offres_stock",
+    description="Chargement et transformation du stock de fichiers brutes d'offres présents dans le dossier donnees_brutes.",
+    schedule=None,
+    start_date=datetime(2024, 5, 23, tzinfo=local_tz),
+    catchup=False
+)
+def pipeline_offres_stock():
+
+    @task
+    def chargement():
+        chargement_offres.chargement_offres_stock()
+
+    transformation = BashOperator(
+
+        task_id='transformation',
+        bash_command="""
+            cd /opt/airflow/modules/transformation
+            dbt run --target prod
+        """
+    )
+
+    chargement() >> transformation
+
+pipeline_offres_stock()
+```
+
+<u>Extraits des logs d'execution Airflow. Tâche chargement</u>
+
+```text
+1b5a09019707
+*** Found local files:
+***   * /opt/airflow/logs/dag_id=pipeline_offres_stock/run_id=manual__2024-08-05T12:02:19.222433+00:00/task_id=chargement/attempt=1.log
+[2024-08-05, 14:02:19 CEST] {local_task_job_runner.py:120} ▼ Pre task execution logs
+[2024-08-05, 14:02:19 CEST] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: pipeline_offres_stock.chargement manual__2024-08-05T12:02:19.222433+00:00 [queued]>
+[2024-08-05, 14:02:19 CEST] {taskinstance.py:2073} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: pipeline_offres_stock.chargement manual__2024-08-05T12:02:19.222433+00:00 [queued]>
+[2024-08-05, 14:02:19 CEST] {taskinstance.py:2303} INFO - Starting attempt 1 of 1
+[2024-08-05, 14:02:19 CEST] {taskinstance.py:2327} INFO - Executing <Task(_PythonDecoratedOperator): chargement> on 2024-08-05 12:02:19.222433+00:00
+[2024-08-05, 14:02:19 CEST] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'pipeline_offres_stock', 'chargement', 'manual__2024-08-05T12:02:19.222433+00:00', '--job-id', '32', '--raw', '--subdir', 'DAGS_FOLDER/pipeline_offres_stock.py', '--cfg-path', '/tmp/tmpzxzkhqf7']
+[2024-08-05, 14:02:19 CEST] {logging_mixin.py:188} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:61 DeprecationWarning: This process (pid=5632) is multi-threaded, use of fork() may lead to deadlocks in the child.
+[2024-08-05, 14:02:19 CEST] {standard_task_runner.py:91} INFO - Job 32: Subtask chargement
+[2024-08-05, 14:02:19 CEST] {standard_task_runner.py:63} INFO - Started process 5643 to run task
+[2024-08-05, 14:02:19 CEST] {task_command.py:426} INFO - Running <TaskInstance: pipeline_offres_stock.chargement manual__2024-08-05T12:02:19.222433+00:00 [running]> on host 1b5a09019707
+[2024-08-05, 14:02:19 CEST] {taskinstance.py:2644} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='pipeline_offres_stock' AIRFLOW_CTX_TASK_ID='chargement' AIRFLOW_CTX_EXECUTION_DATE='2024-08-05T12:02:19.222433+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-08-05T12:02:19.222433+00:00'
+[2024-08-05, 14:02:19 CEST] {taskinstance.py:430} ▲▲▲ Log group end
+[2024-08-05, 14:02:39 CEST] {logging_mixin.py:188} INFO - 
+893703 enregistrements chargés !
+[2024-08-05, 14:02:39 CEST] {python.py:237} INFO - Done. Returned value was: None
+[2024-08-05, 14:02:39 CEST] {taskinstance.py:441} ▼ Post task execution logs
+[2024-08-05, 14:02:39 CEST] {taskinstance.py:1205} INFO - Marking task as SUCCESS. dag_id=pipeline_offres_stock, task_id=chargement, execution_date=20240805T120219, start_date=20240805T120219, end_date=20240805T120239
+[2024-08-05, 14:02:39 CEST] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2024-08-05, 14:02:39 CEST] {taskinstance.py:3482} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2024-08-05, 14:02:39 CEST] {local_task_job_runner.py:222} ▲▲▲ Log group end
+```
+
+<u>Extraits des logs d'execution Airflow. Tâche transformation</u>
+
+```text
+1b5a09019707
+*** Found local files:
+***   * /opt/airflow/logs/dag_id=pipeline_offres_stock/run_id=manual__2024-08-05T12:02:19.222433+00:00/task_id=transformation/attempt=1.log
+[2024-08-05, 14:02:39 CEST] {local_task_job_runner.py:120} ▶ Pre task execution logs
+[2024-08-05, 14:02:39 CEST] {subprocess.py:63} INFO - Tmp dir root location: /tmp
+[2024-08-05, 14:02:39 CEST] {subprocess.py:75} INFO - Running command: ['/usr/bin/bash', '-c', '\n            cd /opt/***/modules/transformation\n            dbt run --target prod\n        ']
+[2024-08-05, 14:02:39 CEST] {subprocess.py:86} INFO - Output:
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  Running with dbt=1.8.3
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  Registered adapter: postgres=1.8.2
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  Found 7 models, 15 sources, 415 macros
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  Concurrency: 4 threads (target='prod')
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  1 of 7 START sql incremental model emploi.departement .......................... [RUN]
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  2 of 7 START sql incremental model emploi.dim_lieu ............................. [RUN]
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  3 of 7 START sql table model emploi.dim_lieu_activite .......................... [RUN]
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  4 of 7 START sql table model emploi.dim_naf .................................... [RUN]
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  1 of 7 OK created sql incremental model emploi.departement ..................... [INSERT 0 101 in 0.18s]
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  4 of 7 OK created sql table model emploi.dim_naf ............................... [SELECT 732 in 0.18s]
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  5 of 7 START sql incremental model emploi.dim_rome ............................. [RUN]
+[2024-08-05, 14:02:41 CEST] {subprocess.py:93} INFO - 12:02:41  6 of 7 START sql incremental model emploi.fait_offre_emploi .................... [RUN]
+[2024-08-05, 14:02:42 CEST] {subprocess.py:93} INFO - 12:02:42  5 of 7 OK created sql incremental model emploi.dim_rome ........................ [INSERT 0 609 in 0.12s]
+[2024-08-05, 14:02:42 CEST] {subprocess.py:93} INFO - 12:02:42  7 of 7 START sql table model emploi.region ..................................... [RUN]
+[2024-08-05, 14:02:42 CEST] {subprocess.py:93} INFO - 12:02:42  2 of 7 OK created sql incremental model emploi.dim_lieu ........................ [INSERT 0 34980 in 0.38s]
+[2024-08-05, 14:02:42 CEST] {subprocess.py:93} INFO - 12:02:42  7 of 7 OK created sql table model emploi.region ................................ [SELECT 18 in 0.08s]
+[2024-08-05, 14:02:47 CEST] {subprocess.py:93} INFO - 12:02:47  6 of 7 OK created sql incremental model emploi.fait_offre_emploi ............... [INSERT 0 893703 in 5.43s]
+[2024-08-05, 14:02:51 CEST] {subprocess.py:93} INFO - 12:02:51  3 of 7 OK created sql table model emploi.dim_lieu_activite ..................... [SELECT 2550627 in 9.34s]
+[2024-08-05, 14:02:51 CEST] {subprocess.py:93} INFO - 12:02:51
+[2024-08-05, 14:02:51 CEST] {subprocess.py:93} INFO - 12:02:51  Finished running 4 incremental models, 3 table models in 0 hours 0 minutes and 9.46 seconds (9.46s).
+[2024-08-05, 14:02:51 CEST] {subprocess.py:93} INFO - 12:02:51
+[2024-08-05, 14:02:51 CEST] {subprocess.py:93} INFO - 12:02:51  Completed successfully
+[2024-08-05, 14:02:51 CEST] {subprocess.py:93} INFO - 12:02:51
+[2024-08-05, 14:02:51 CEST] {subprocess.py:93} INFO - 12:02:51  Done. PASS=7 WARN=0 ERROR=0 SKIP=0 TOTAL=7
+[2024-08-05, 14:02:52 CEST] {subprocess.py:97} INFO - Command exited with return code 0
+[2024-08-05, 14:02:52 CEST] {taskinstance.py:441} ▶ Post task execution logs
+```
 
 
 ## Docker
