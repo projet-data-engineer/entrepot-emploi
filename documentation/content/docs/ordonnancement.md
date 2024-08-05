@@ -277,3 +277,47 @@ Fin collecte de 50171/50175 offres en date du 2024-08-01
 [2024-08-04, 11:26:16 CEST] {subprocess.py:97} INFO - Command exited with return code 0
 [2024-08-04, 11:26:16 CEST] {taskinstance.py:441} ▶ Post task execution logs
 ```
+
+
+
+## Docker
+
+- Docker est une plateforme qui permet de créer, déployer et exécuter des applications à l'intérieur de conteneurs. Cela permet notamment d'isoler les applications ainsi que leurs dépendances. Nous assurons également la portabilité de notre projet entre les environnements de développement et de production.
+
+- Pour notre projet, on définit plusieurs services Docker pour exécuter Apache Airflow avec une base de données PostgreSQL, ainsi qu'une base de données supplémentaire pour le stockage des données. Les conteneurs sont configurés pour communiquer entre eux via un réseau Docker commun, et les données sont conservés à l'aide de volumes.
+
+
+#### Configuration commune
+- 
+- On utilise une definition commune configurer une première fois les éléments qui pourront être réutilisés dans d’autres parties du fichier. 
+- On spécifie le répertoire de construction pour l'image Docker (ici, `./airflow`)
+- On définit l'utilisateur, les variables d'environnements de configuration d'Apache Airflow, les networks utilisés par le conteneur.
+- On monte les volumes pour le partage des fichiers locaux et distants.
+
+#### Définition de 4 services
+
+- **airflow-repo** :
+  - Ce service utilise l'image PostgreSQL pour créer une base de données pour Airflow.
+  - On définit les variables d'environnement pour configurer la base de données (utilisateur, mot de passe, base de données).
+  - On conditionne une verification (healthcheck) pour vérifier la disponibilité de PostgreSQL.
+  
+- **airflow-scheduler** :
+  - Hérite des paramètres communs définis dans `x-airflow-common`.
+  - Spécifie l'image à utiliser et la commande à exécuter (scheduler).
+  - Dépend de `airflow-repo` pour s'assurer que la base de données est disponible avant de démarrer.
+
+- **airflow-webserver** :
+  - Hérite également des paramètres communs.
+  - Spécifie l'image à utiliser et la commande à exécuter (webserver).
+  - Expose le port 8070 pour accéder à l'interface web d'Airflow.
+  - Configure un utilisateur administrateur pour l'interface web d'Airflow.
+  - Dépend de `airflow-repo`.
+
+- **entrepot** :
+  - Utilise l'image PostgreSQL pour créer une autre base de données distincte appelée `entrepot`.
+  - Expose le port 5432 pour l'accès à la base de données.
+  - Monte un volume pour garder une cohérence entre les données de la base de données.
+
+#### Réseaux et volumes :
+- **networks** : Définition d'un réseau nommé `data-emploi` pour permettre la communication entre les différents services.
+- **volumes** : Définition d'un volume nommé `entrepot` pour garder une cohérence entre les données de la base de données `entrepot`.
