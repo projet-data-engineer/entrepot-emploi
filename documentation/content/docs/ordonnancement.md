@@ -423,6 +423,7 @@ pipeline_offres_stock()
   - Ce service utilise l'image PostgreSQL pour créer une base de données pour Airflow.
   - On définit les variables d'environnement pour configurer la base de données (utilisateur, mot de passe, base de données).
   - On conditionne une verification (healthcheck) pour vérifier la disponibilité de PostgreSQL.
+  - C'est la base de métadonnés d'Airflow
   
 - **airflow-scheduler** :
   - Hérite des paramètres communs définis dans `x-airflow-common`.

@@ -466,7 +466,7 @@ def chargement(yyyy_mm):
 
 ## Chargement de la nomenclatures NAF
 
-- Le traitement des établissement SIRENE est executé via le script Python **/chargement/chargement_naf.py**
+- Le traitement des fichiers pour la nomenclature NAF est executé via le script Python **/chargement/chargement_naf.py**
 - Il charge les 6 fichiers (5 niveaux + table de correspondance) dans 6 tables distinctes
 - Les 5 niveaux seront dénormalisés par le traitement de transformation
 
@@ -488,6 +488,6 @@ con.sql( f"""
 
 ## Chargement de la nomenclature ROME
 
-- Le traitement des établissement SIRENE est executé via le script Python **/chargement/chargement_rome.py**
+- Le traitement des fichiers pour la nomenclature ROME est executé via le script Python **/chargement/chargement_rome.py**
 - Il charge les 3 fichiers correspondants aux 3 niveaux de la nomenclature dans 3 tables distinctes
 - Les 3 niveaux seront dénormalisés par le traitement de transformation
