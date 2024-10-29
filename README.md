@@ -1,4 +1,4 @@
-# Construction d'un entrepôt de données des basé sur les offres d'emploi France Travail
+# Construction d'un entrepôt de données à partir des offres d'emploi France Travail.io
 
 ## Description
 
